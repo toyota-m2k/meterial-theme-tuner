@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "ThemeTuner (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "ThemeTuner (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
