@@ -15,6 +15,7 @@ using Microsoft.UI.Xaml.Navigation;
 using System.Xml;
 using Windows.Storage;
 using Windows.Storage.Pickers;
+using Windows.ApplicationModel.DataTransfer;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -37,15 +38,25 @@ namespace ThemeTuner {
                     WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
                     var file = await picker.PickSingleFileAsync();
                     if (file != null) {
-                        //ViewModel.InputFile.Value = file;
-                        var themeSet = AndroidColorThemeSet.Builder.AppendAuto(file).Build();
-                        ViewModel.ThemeSet.Value = themeSet;
+                        ViewModel.LoadTheme(file);
                     }
                 }
                 catch (Exception e) {
                     Console.WriteLine(e);
                 }
             });
+        }
+
+        private void OnDragEnter(object sender, DragEventArgs e) {
+            e.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.Copy;
+        }
+
+        private void OnDragOver(object sender, DragEventArgs e) {
+
+        }
+
+        private void OnDrop(object sender, DragEventArgs e) {
+
         }
     }
 }

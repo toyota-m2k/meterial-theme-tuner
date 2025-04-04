@@ -6,6 +6,10 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrayNotify;
+using Windows.Media.Ocr;
+using System.Drawing;
 
 namespace ThemeTuner;
 
@@ -58,10 +62,86 @@ public class AndroidColorTheme {
     private ReactiveProperty<NamedColor> onSurface { get; } = new(NamedColor.Empty);
     private ReactiveProperty<NamedColor> onSurfaceVariant { get; } = new(NamedColor.Empty);
 
+    // Ohers ... Error and Scrim --
+    private ReactiveProperty<NamedColor> error { get; } = new(NamedColor.Empty);
+    private ReactiveProperty<NamedColor> onError { get; } = new(NamedColor.Empty);
+    private ReactiveProperty<NamedColor> errorContainer { get; } = new(NamedColor.Empty);
+    private ReactiveProperty<NamedColor> onErrorContainer { get; } = new(NamedColor.Empty);
+    private ReactiveProperty<NamedColor> background { get; } = new(NamedColor.Empty);
+    private ReactiveProperty<NamedColor> onBackground { get; } = new(NamedColor.Empty);
+    private ReactiveProperty<NamedColor> outline { get; } = new(NamedColor.Empty);
+    private ReactiveProperty<NamedColor> outlineVariant { get; } = new(NamedColor.Empty);
+    private ReactiveProperty<NamedColor> scrim { get; } = new(NamedColor.Empty);
+
+
+    public List<ReactiveProperty<NamedColor>> ColorProperties => new() {
+        primary,
+        onPrimary,
+        primaryContainer,
+        onPrimaryContainer,
+        secondary,
+        onSecondary,
+        secondaryContainer,
+        onSecondaryContainer,
+        tertiary,
+        onTertiary,
+        tertiaryContainer,
+        onTertiaryContainer,
+        error,
+        onError,
+        errorContainer,
+        onErrorContainer,
+        background,
+        onBackground,
+        surface,
+        onSurface,
+        surfaceVariant,
+        onSurfaceVariant,
+        outline,
+        outlineVariant,
+        scrim,
+        inverseSurface,
+        inverseOnSurface,
+        inversePrimary,
+        primaryFixed,
+        onPrimaryFixed,
+        primaryFixedDim,
+        onPrimaryFixedVariant,
+        secondaryFixed,
+        onSecondaryFixed,
+        secondaryFixedDim,
+        onSecondaryFixedVariant,
+        tertiaryFixed,
+        onTertiaryFixed,
+        tertiaryFixedDim,
+        onTertiaryFixedVariant,
+        surfaceDim,
+        surfaceBright,
+        surfaceContainerLowest,
+        surfaceContainerLow,
+        surfaceContainer,
+        surfaceContainerHigh,
+        surfaceContainerHighest,
+    };
+
+    public Color[] SettingColors {
+        get => ColorProperties.Select(c => c.Value.Color).ToArray();
+        set {
+            var dst = ColorProperties;
+            for (int i=0, ci=dst.Count; i<ci; i++) {
+                if(dst[i].Value.Color != value[i]) {
+                    dst[i].Value = new(dst[i].Value.Name, value[i]);
+                }
+            }
+        }
+    }
+
     public class ColorPair {
+        public bool IsSingle { get; }
         public ReactiveProperty<NamedColor> Background { get; }
         public ReactiveProperty<NamedColor> Foreground { get; }
-        public ColorPair(ReactiveProperty<NamedColor> background, ReactiveProperty<NamedColor> foreground) {
+        public ColorPair(ReactiveProperty<NamedColor> background, ReactiveProperty<NamedColor> foreground, bool isSingle=false) {
+            IsSingle = isSingle;
             Background = background;
             Foreground = foreground;
         }
@@ -167,53 +247,88 @@ public class AndroidColorTheme {
         public ReadOnlyReactiveProperty<bool> IsEmptyObservable => Base.IsEmptyObservable.CombineLatest(Variant.IsEmptyObservable, Inverse.IsEmptyObservable, Dim.IsEmptyObservable, Bright.IsEmptyObservable, ContainerLowest.IsEmptyObservable, ContainerLow.IsEmptyObservable, Container.IsEmptyObservable, ContainerHigh.IsEmptyObservable, ContainerHighest.IsEmptyObservable, (b, v, i, d, br, cl, clow, c, ch, chigh) => b && v && i && d && br && cl && clow && c && ch && chigh).ToReadOnlyReactiveProperty();
     }
 
+    public class  OtherTheme {
+        public ColorPair Error { get; set; }
+        public ColorPair ErrorContainer { get; set; }
+        public ColorPair Background { get; set; }
+        public ColorPair Outline { get; set; }
+        public ColorPair OutlineVariant { get; set; }
+        public ColorPair Scrim { get; set; }
+
+        public OtherTheme(AndroidColorTheme p) {
+            Error = new (p.error, p.onError);
+            ErrorContainer = new (p.errorContainer, p.onErrorContainer);
+            Background = new (p.background, p.onBackground);
+            Outline = new(p.outline, p.inverseOnSurface, isSingle:true);
+            OutlineVariant = new(p.outlineVariant, p.onSurface, isSingle: true);
+            Scrim = new(p.scrim, p.inverseOnSurface, isSingle: true);
+        }
+    }
+
     public PrimaryTheme Primary;
     public SecondaryTheme Secondary;
     public TertiaryTheme Tertiary;
     public SurfaceTheme Surface;
+    public OtherTheme Other;
+
     private AndroidColorTheme(List<NamedColor> colors) {
-        primary.Value = colors.FirstOrDefault(it => it.Name == "primary") ?? NamedColor.Empty;
-        primaryContainer.Value = colors.FirstOrDefault(it => it.Name == "primaryContainer") ?? NamedColor.Empty;
-        inversePrimary.Value = colors.FirstOrDefault(it => it.Name == "inversePrimary") ?? NamedColor.Empty;
-        primaryFixed.Value = colors.FirstOrDefault(it => it.Name == "primaryFixed") ?? NamedColor.Empty;
-        primaryFixedDim.Value = colors.FirstOrDefault(it => it.Name == "primaryFixedDim") ?? NamedColor.Empty;
-        onPrimary.Value = colors.FirstOrDefault(it => it.Name == "onPrimary") ?? NamedColor.Empty;
-        onPrimaryContainer.Value = colors.FirstOrDefault(it => it.Name == "onPrimaryContainer") ?? NamedColor.Empty;
-        onPrimaryFixed.Value = colors.FirstOrDefault(it => it.Name == "onPrimaryFixed") ?? NamedColor.Empty;
-        onPrimaryFixedVariant.Value = colors.FirstOrDefault(it => it.Name == "onPrimaryFixedVariant") ?? NamedColor.Empty;
-        secondary.Value = colors.FirstOrDefault(it => it.Name == "secondary") ?? NamedColor.Empty;
-        secondaryContainer.Value = colors.FirstOrDefault(it => it.Name == "secondaryContainer") ?? NamedColor.Empty;
-        secondaryFixed.Value = colors.FirstOrDefault(it => it.Name == "secondaryFixed") ?? NamedColor.Empty;
-        secondaryFixedDim.Value = colors.FirstOrDefault(it => it.Name == "secondaryFixedDim") ?? NamedColor.Empty;
-        onSecondary.Value = colors.FirstOrDefault(it => it.Name == "onSecondary") ?? NamedColor.Empty;
-        onSecondaryContainer.Value = colors.FirstOrDefault(it => it.Name == "onSecondaryContainer") ?? NamedColor.Empty;
-        onSecondaryFixed.Value = colors.FirstOrDefault(it => it.Name == "onSecondaryFixed") ?? NamedColor.Empty;
-        onSecondaryFixedVariant.Value = colors.FirstOrDefault(it => it.Name == "onSecondaryFixedVariant") ?? NamedColor.Empty;
-        tertiary.Value = colors.FirstOrDefault(it => it.Name == "tertiary") ?? NamedColor.Empty;
-        tertiaryContainer.Value = colors.FirstOrDefault(it => it.Name == "tertiaryContainer") ?? NamedColor.Empty;
-        tertiaryFixed.Value = colors.FirstOrDefault(it => it.Name == "tertiaryFixed") ?? NamedColor.Empty;
-        tertiaryFixedDim.Value = colors.FirstOrDefault(it => it.Name == "tertiaryFixedDim") ?? NamedColor.Empty;
-        onTertiary.Value = colors.FirstOrDefault(it => it.Name == "onTertiary") ?? NamedColor.Empty;
-        onTertiaryContainer.Value = colors.FirstOrDefault(it => it.Name == "onTertiaryContainer") ?? NamedColor.Empty;
-        onTertiaryFixed.Value = colors.FirstOrDefault(it => it.Name == "onTertiaryFixed") ?? NamedColor.Empty;
-        onTertiaryFixedVariant.Value = colors.FirstOrDefault(it => it.Name == "onTertiaryFixedVariant") ?? NamedColor.Empty;
-        surface.Value = colors.FirstOrDefault(it => it.Name == "surface") ?? NamedColor.Empty;
-        surfaceVariant.Value = colors.FirstOrDefault(it => it.Name == "surfaceVariant") ?? NamedColor.Empty;
-        inverseSurface.Value = colors.FirstOrDefault(it => it.Name == "inverseSurface") ?? NamedColor.Empty;
-        inverseOnSurface.Value = colors.FirstOrDefault(it => it.Name == "inverseOnSurface") ?? NamedColor.Empty;
-        surfaceDim.Value = colors.FirstOrDefault(it => it.Name == "surfaceDim") ?? NamedColor.Empty;
-        surfaceBright.Value = colors.FirstOrDefault(it => it.Name == "surfaceBright") ?? NamedColor.Empty;
-        surfaceContainerLowest.Value = colors.FirstOrDefault(it => it.Name == "surfaceContainerLowest") ?? NamedColor.Empty;
-        surfaceContainerLow.Value = colors.FirstOrDefault(it => it.Name == "surfaceContainerLow") ?? NamedColor.Empty;
-        surfaceContainer.Value = colors.FirstOrDefault(it => it.Name == "surfaceContainer") ?? NamedColor.Empty;
-        surfaceContainerHigh.Value = colors.FirstOrDefault(it => it.Name == "surfaceContainerHigh") ?? NamedColor.Empty;
-        surfaceContainerHighest.Value = colors.FirstOrDefault(it => it.Name == "surfaceContainerHighest") ?? NamedColor.Empty;
-        onSurface.Value = colors.FirstOrDefault(it => it.Name == "onSurface") ?? NamedColor.Empty;
-        onSurfaceVariant.Value = colors.FirstOrDefault(it => it.Name == "onSurfaceVariant") ?? NamedColor.Empty;
+        foreach (var nc in colors) {
+            switch (nc.Name) {
+                case "primary": primary.Value = nc; break;
+                case "primaryContainer": primaryContainer.Value = nc; break;
+                case "inversePrimary": inversePrimary.Value = nc; break;
+                case "primaryFixed": primaryFixed.Value = nc; break;
+                case "primaryFixedDim": primaryFixedDim.Value = nc; break;
+                case "onPrimary": onPrimary.Value = nc; break;
+                case "onPrimaryContainer": onPrimaryContainer.Value = nc; break;
+                case "onPrimaryFixed": onPrimaryFixed.Value = nc; break;
+                case "onPrimaryFixedVariant": onPrimaryFixedVariant.Value = nc; break;
+                case "secondary": secondary.Value = nc; break;
+                case "secondaryContainer": secondaryContainer.Value = nc; break;
+                case "secondaryFixed": secondaryFixed.Value = nc; break;
+                case "secondaryFixedDim": secondaryFixedDim.Value = nc; break;
+                case "onSecondary": onSecondary.Value = nc; break;
+                case "onSecondaryContainer": onSecondaryContainer.Value = nc; break;
+                case "onSecondaryFixed": onSecondaryFixed.Value = nc; break;
+                case "onSecondaryFixedVariant": onSecondaryFixedVariant.Value = nc; break;
+                case "tertiary": tertiary.Value = nc; break;
+                case "tertiaryContainer": tertiaryContainer.Value = nc; break;
+                case "tertiaryFixed": tertiaryFixed.Value = nc; break;
+                case "tertiaryFixedDim": tertiaryFixedDim.Value = nc; break;
+                case "onTertiary": onTertiary.Value = nc; break;
+                case "onTertiaryContainer": onTertiaryContainer.Value = nc; break;
+                case "onTertiaryFixed": onTertiaryFixed.Value = nc; break;
+                case "onTertiaryFixedVariant": onTertiaryFixedVariant.Value = nc; break;
+                case "surface": surface.Value = nc; break;
+                case "surfaceVariant": surfaceVariant.Value = nc; break;
+                case "inverseSurface": inverseSurface.Value = nc; break;
+                case "inverseOnSurface": inverseOnSurface.Value = nc; break;
+                case "surfaceDim": surfaceDim.Value = nc; break;
+                case "surfaceBright": surfaceBright.Value = nc; break;
+                case "surfaceContainerLowest": surfaceContainerLowest.Value = nc; break;
+                case "surfaceContainerLow": surfaceContainerLow.Value = nc; break;
+                case "surfaceContainer": surfaceContainer.Value = nc; break;
+                case "surfaceContainerHigh": surfaceContainerHigh.Value = nc; break;
+                case "surfaceContainerHighest": surfaceContainerHighest.Value = nc; break;
+                case "onSurface": onSurface.Value = nc; break;
+                case "onSurfaceVariant": onSurfaceVariant.Value = nc; break;
+                case "error": error.Value = nc; break;
+                case "onError": onError.Value = nc; break;
+                case "errorContainer": errorContainer.Value = nc; break;
+                case "onErrorContainer": onErrorContainer.Value = nc; break;
+                case "background": background.Value = nc; break;
+                case "onBackground": onBackground.Value = nc; break;
+                case "outline": outline.Value = nc; break;
+                case "outlineVariant": outlineVariant.Value = nc; break;
+                case "scrim": scrim.Value = nc; break;
+            }
+        }
+
         Primary = new(this);
         Secondary = new(this);
         Tertiary = new(this);
         Surface = new(this);
+        Other = new(this);
     }
 
     public static AndroidColorTheme NormalTheme(AndroidColors colors) {

@@ -37,13 +37,22 @@
                 <controls:SegmentedItem Content="Medium"/>
                 <controls:SegmentedItem Content="High"/>
             </controls:Segmented>
+            <Button Command="{x:Bind ViewModel.UndoCommand}" IsEnabled="{x:Bind ViewModel.History.CanUndo.Value, Mode=OneWay}">Undo</Button>
+            <Button Command="{x:Bind ViewModel.RedoCommand}" IsEnabled="{x:Bind ViewModel.History.CanRedo.Value, Mode=OneWay}" Margin="-10,0,0,0">Redo</Button>
         </StackPanel>
-        <Grid Grid.Row="1" Visibility="{x:Bind ViewModel.IsThemeAvailable.Value, Mode=OneWay}">
+        <Grid 
+            Grid.Row="1" 
+            Visibility="{x:Bind ViewModel.IsThemeAvailable.Value, Mode=OneWay}"
+            AllowDrop="True"
+            DragEnter="OnDragEnter"
+            DragOver="OnDragOver"
+            Drop="OnDrop"
+            >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="2*"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
@@ -52,23 +61,27 @@
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-            <local:ColorCellView Grid.Row="0" Grid.Column="0" Colors="{x:Bind ViewModel.Theme.Value.Primary.Base, Mode=OneWay}"/>
-            <local:ColorCellView Grid.Row="1" Grid.Column="0" Colors="{x:Bind ViewModel.Theme.Value.Primary.Container, Mode=OneWay}"/>
-            <local:ColorCellView Grid.Row="2" Grid.Column="0" Colors="{x:Bind ViewModel.Theme.Value.Primary.Fixed, Mode=OneWay}"/>
-            <local:ColorCellView Grid.Row="3" Grid.Column="0" Colors="{x:Bind ViewModel.Theme.Value.Primary.FixedDim, Mode=OneWay}"/>
-            <local:ColorCellView Grid.Row="4" Grid.Column="0" Colors="{x:Bind ViewModel.Theme.Value.Primary.Inverse, Mode=OneWay}"/>
+            <local:ColorCellView Grid.Row="0" Grid.Column="0" Colors="{x:Bind ViewModel.Theme.Value.Primary.Base, Mode=OneWay}" OnColorChanged="{x:Bind ViewModel.OnColorChanged}"/>
+            <local:ColorCellView Grid.Row="1" Grid.Column="0" Colors="{x:Bind ViewModel.Theme.Value.Primary.Container, Mode=OneWay}" OnColorChanged="{x:Bind ViewModel.OnColorChanged}"/>
+            <local:ColorCellView Grid.Row="2" Grid.Column="0" Colors="{x:Bind ViewModel.Theme.Value.Primary.Fixed, Mode=OneWay}" OnColorChanged="{x:Bind ViewModel.OnColorChanged}"/>
+            <local:ColorCellView Grid.Row="3" Grid.Column="0" Colors="{x:Bind ViewModel.Theme.Value.Primary.FixedDim, Mode=OneWay}" OnColorChanged="{x:Bind ViewModel.OnColorChanged}"/>
+            <local:ColorCellView Grid.Row="4" Grid.Column="0" Colors="{x:Bind ViewModel.Theme.Value.Primary.Inverse, Mode=OneWay}" OnColorChanged="{x:Bind ViewModel.OnColorChanged}"/>
 
-            <local:ColorCellView Grid.Row="0" Grid.Column="1" Colors="{x:Bind ViewModel.Theme.Value.Secondary.Base, Mode=OneWay}"/>
-            <local:ColorCellView Grid.Row="1" Grid.Column="1" Colors="{x:Bind ViewModel.Theme.Value.Secondary.Container, Mode=OneWay}"/>
-            <local:ColorCellView Grid.Row="2" Grid.Column="1" Colors="{x:Bind ViewModel.Theme.Value.Secondary.Fixed, Mode=OneWay}"/>
-            <local:ColorCellView Grid.Row="3" Grid.Column="1" Colors="{x:Bind ViewModel.Theme.Value.Secondary.FixedDim, Mode=OneWay}"/>
+            <local:ColorCellView Grid.Row="0" Grid.Column="1" Colors="{x:Bind ViewModel.Theme.Value.Secondary.Base, Mode=OneWay}" OnColorChanged="{x:Bind ViewModel.OnColorChanged}"/>
+            <local:ColorCellView Grid.Row="1" Grid.Column="1" Colors="{x:Bind ViewModel.Theme.Value.Secondary.Container, Mode=OneWay}" OnColorChanged="{x:Bind ViewModel.OnColorChanged}"/>
+            <local:ColorCellView Grid.Row="2" Grid.Column="1" Colors="{x:Bind ViewModel.Theme.Value.Secondary.Fixed, Mode=OneWay}" OnColorChanged="{x:Bind ViewModel.OnColorChanged}"/>
+            <local:ColorCellView Grid.Row="3" Grid.Column="1" Colors="{x:Bind ViewModel.Theme.Value.Secondary.FixedDim, Mode=OneWay}" OnColorChanged="{x:Bind ViewModel.OnColorChanged}"/>
 
-            <local:ColorCellView Grid.Row="0" Grid.Column="2" Colors="{x:Bind ViewModel.Theme.Value.Tertiary.Base, Mode=OneWay}"/>
-            <local:ColorCellView Grid.Row="1" Grid.Column="2" Colors="{x:Bind ViewModel.Theme.Value.Tertiary.Container, Mode=OneWay}"/>
-            <local:ColorCellView Grid.Row="2" Grid.Column="2" Colors="{x:Bind ViewModel.Theme.Value.Tertiary.Fixed, Mode=OneWay}"/>
-            <local:ColorCellView Grid.Row="3" Grid.Column="2" Colors="{x:Bind ViewModel.Theme.Value.Tertiary.FixedDim, Mode=OneWay}"/>
+            <local:ColorCellView Grid.Row="0" Grid.Column="2" Colors="{x:Bind ViewModel.Theme.Value.Tertiary.Base, Mode=OneWay}" OnColorChanged="{x:Bind ViewModel.OnColorChanged}"/>
+            <local:ColorCellView Grid.Row="1" Grid.Column="2" Colors="{x:Bind ViewModel.Theme.Value.Tertiary.Container, Mode=OneWay}" OnColorChanged="{x:Bind ViewModel.OnColorChanged}"/>
+            <local:ColorCellView Grid.Row="2" Grid.Column="2" Colors="{x:Bind ViewModel.Theme.Value.Tertiary.Fixed, Mode=OneWay}" OnColorChanged="{x:Bind ViewModel.OnColorChanged}"/>
+            <local:ColorCellView Grid.Row="3" Grid.Column="2" Colors="{x:Bind ViewModel.Theme.Value.Tertiary.FixedDim, Mode=OneWay}" OnColorChanged="{x:Bind ViewModel.OnColorChanged}"/>
 
             <Grid Grid.Row="0" Grid.Column="3" Grid.RowSpan="5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="*"/>
@@ -81,16 +94,24 @@
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <local:ColorCellView Grid.Row="0" Colors="{x:Bind ViewModel.Theme.Value.Surface.Base, Mode=OneWay}"/>
-                <local:ColorCellView Grid.Row="1" Colors="{x:Bind ViewModel.Theme.Value.Surface.Variant, Mode=OneWay}"/>
-                <local:ColorCellView Grid.Row="2" Colors="{x:Bind ViewModel.Theme.Value.Surface.Inverse , Mode=OneWay}"/>
-                <local:ColorCellView Grid.Row="3" Colors="{x:Bind ViewModel.Theme.Value.Surface.Dim, Mode=OneWay}"/>
-                <local:ColorCellView Grid.Row="4" Colors="{x:Bind ViewModel.Theme.Value.Surface.Bright, Mode=OneWay}"/>
-                <local:ColorCellView Grid.Row="5" Colors="{x:Bind ViewModel.Theme.Value.Surface.ContainerHighest, Mode=OneWay}"/>
-                <local:ColorCellView Grid.Row="6" Colors="{x:Bind ViewModel.Theme.Value.Surface.ContainerHigh, Mode=OneWay}"/>
-                <local:ColorCellView Grid.Row="7" Colors="{x:Bind ViewModel.Theme.Value.Surface.Container, Mode=OneWay}"/>
-                <local:ColorCellView Grid.Row="8" Colors="{x:Bind ViewModel.Theme.Value.Surface.ContainerLow, Mode=OneWay}"/>
-                <local:ColorCellView Grid.Row="9" Colors="{x:Bind ViewModel.Theme.Value.Surface.ContainerLowest, Mode=OneWay}"/>
+                <local:ColorCellView Grid.Row="0" Grid.Column="0" Colors="{x:Bind ViewModel.Theme.Value.Surface.Base, Mode=OneWay}" OnColorChanged="{x:Bind ViewModel.OnColorChanged}"/>
+                <local:ColorCellView Grid.Row="1" Grid.Column="0" Colors="{x:Bind ViewModel.Theme.Value.Surface.Variant, Mode=OneWay}" OnColorChanged="{x:Bind ViewModel.OnColorChanged}"/>
+                <local:ColorCellView Grid.Row="2" Grid.Column="0" Colors="{x:Bind ViewModel.Theme.Value.Surface.Inverse , Mode=OneWay}" OnColorChanged="{x:Bind ViewModel.OnColorChanged}"/>
+                <local:ColorCellView Grid.Row="3" Grid.Column="0" Colors="{x:Bind ViewModel.Theme.Value.Surface.Dim, Mode=OneWay}" OnColorChanged="{x:Bind ViewModel.OnColorChanged}"/>
+                <local:ColorCellView Grid.Row="4" Grid.Column="0" Colors="{x:Bind ViewModel.Theme.Value.Surface.Bright, Mode=OneWay}" OnColorChanged="{x:Bind ViewModel.OnColorChanged}"/>
+                <local:ColorCellView Grid.Row="5" Grid.Column="0" Colors="{x:Bind ViewModel.Theme.Value.Surface.ContainerHighest, Mode=OneWay}" OnColorChanged="{x:Bind ViewModel.OnColorChanged}"/>
+                <local:ColorCellView Grid.Row="6" Grid.Column="0" Colors="{x:Bind ViewModel.Theme.Value.Surface.ContainerHigh, Mode=OneWay}" OnColorChanged="{x:Bind ViewModel.OnColorChanged}"/>
+                <local:ColorCellView Grid.Row="7" Grid.Column="0" Colors="{x:Bind ViewModel.Theme.Value.Surface.Container, Mode=OneWay}" OnColorChanged="{x:Bind ViewModel.OnColorChanged}"/>
+                <local:ColorCellView Grid.Row="8" Grid.Column="0" Colors="{x:Bind ViewModel.Theme.Value.Surface.ContainerLow, Mode=OneWay}" OnColorChanged="{x:Bind ViewModel.OnColorChanged}"/>
+                <local:ColorCellView Grid.Row="9" Grid.Column="0" Colors="{x:Bind ViewModel.Theme.Value.Surface.ContainerLowest, Mode=OneWay}" OnColorChanged="{x:Bind ViewModel.OnColorChanged}"/>
+
+                <local:ColorCellView Grid.Row="0" Grid.Column="1" Colors="{x:Bind ViewModel.Theme.Value.Other.Background, Mode=OneWay}" OnColorChanged="{x:Bind ViewModel.OnColorChanged}"/>
+                <local:ColorCellView Grid.Row="1" Grid.Column="1" Colors="{x:Bind ViewModel.Theme.Value.Other.Outline, Mode=OneWay}" OnColorChanged="{x:Bind ViewModel.OnColorChanged}"/>
+                <local:ColorCellView Grid.Row="2" Grid.Column="1" Colors="{x:Bind ViewModel.Theme.Value.Other.OutlineVariant, Mode=OneWay}" OnColorChanged="{x:Bind ViewModel.OnColorChanged}"/>
+                <local:ColorCellView Grid.Row="3" Grid.Column="1" Colors="{x:Bind ViewModel.Theme.Value.Other.Scrim, Mode=OneWay}" OnColorChanged="{x:Bind ViewModel.OnColorChanged}"/>
+                <local:ColorCellView Grid.Row="4" Grid.Column="1" Colors="{x:Bind ViewModel.Theme.Value.Other.Error, Mode=OneWay}" OnColorChanged="{x:Bind ViewModel.OnColorChanged}"/>
+                <local:ColorCellView Grid.Row="5" Grid.Column="1" Colors="{x:Bind ViewModel.Theme.Value.Other.ErrorContainer, Mode=OneWay}" OnColorChanged="{x:Bind ViewModel.OnColorChanged}"/>
+
             </Grid>
         </Grid>
     </Grid>

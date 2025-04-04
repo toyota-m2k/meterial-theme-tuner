@@ -23,6 +23,7 @@ namespace ThemeTuner
     public sealed partial class ColorCellView : UserControl
     {
         public ReactiveProperty<ColorPair> ColorPair { get; } = new();
+
         public ColorPair Colors {
             get => ColorPair.Value;
             set => ColorPair.Value = value;
@@ -31,6 +32,8 @@ namespace ThemeTuner
         public ReactiveCommand CommandFg { get; } = new();
         public ReactiveCommand ColorChanged { get; } = new();
         private bool changingBackground = false;
+
+        public event Action? OnColorChanged;
 
         public ColorCellView()
         {
@@ -52,6 +55,7 @@ namespace ThemeTuner
                 else {
                     Colors.Foreground.Value = new NamedColor(Colors.Foreground.Value.Name, colorPicker.Color.ToString());
                 }
+                OnColorChanged?.Invoke();
             });
         }
     }
